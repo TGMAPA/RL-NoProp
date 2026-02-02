@@ -17,7 +17,7 @@ class BanditsEnv:
     # Execute an action (pull a slot)
     def step(self, action):
         slot = self.slots[action]
-        reward = random.choice(
+        reward = random.choices(
             slot["outcomes"],
             slot["probabilities"]
         )[0]
