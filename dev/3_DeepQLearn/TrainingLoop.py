@@ -15,7 +15,8 @@ def train(env,
           batch_size = 32,
           targetNet_update = 100
           ):
-
+    
+    q_history = []
     
     # Training Loop
     for i in range(1, episodes+1):
@@ -61,6 +62,13 @@ def train(env,
             loss.backward()
             optimizer.step()
 
+            if i% 10 == 0:
+                with torch.no_grad():
+                    q = onlineNet(
+                        torch.tensor(env.state, dtype= torch.float32).unsqueeze(0)
+                    )
+                    q_history.append(q.squeeze(0).cpu().numpy())
+
 
         # Update target network
         if i % targetNet_update == 0:
@@ -68,3 +76,5 @@ def train(env,
 
         # Update epsilon
         epsilon = max(epsilon_min, epsilon * epsilon_decay)
+
+    return q_history

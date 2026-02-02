@@ -7,8 +7,6 @@ class DQN(nn.Module):
 
     def __init__(self, in_channels, n_actions):
         """
-        Define the layers of the convolutional neural network.
-
         Parameters:
             in_channels: int
             n_actions: int
@@ -22,8 +20,6 @@ class DQN(nn.Module):
 
     def forward(self, x):
         """
-        Define the forward pass of the neural network.
-
         Parameters:
             x: torch.Tensor
                 The input tensor.

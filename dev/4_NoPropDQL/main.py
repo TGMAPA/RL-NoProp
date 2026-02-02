@@ -1,79 +1,57 @@
-from DQN import DQN
+from DenoisingMLP import DenoisingMLP
 from BanditsEnv import BanditsEnv
-from ReplayMemory import ReplayMemory
+from Diffusion import Diffusion
 from TrainingLoop import train
 import torch, random
 import numpy as np
+import torch.nn as nn
+import torch.optim as optim
 import matplotlib.pyplot as plt
 
 
 # -- Config
-BUFFER_CAPACITY = 1500
-
-# SLOTS = [
-#     {"outcomes": [0, 10], "probabilities": [0.6, 0.4]},
-#     {"outcomes": [0, 100], "probabilities": [0.97, 0.03]},
-# ]
-
 SLOTS = [
-    {"outcomes": [10, 0], "probabilities": [0.6, 0.4]},
-    {"outcomes": [0, 100], "probabilities": [0.4, 0.6]},
+    {"outcomes": [0, 10], "probabilities": [0.6, 0.4]},
+    {"outcomes": [0, 100], "probabilities": [0.97, 0.03]},
 ]
-
-TARGET_UPDATE = 100
-
-BATCH_SIZE = 32
 
 LR = 1e-3
 
-EPISODES = 10000
+EPISODES = 5000
 
+# Diffusion hyperparameters
+
+T = 5
+
+alpha = torch.linspace(1.0, 0.1, T)
 
 
 # -- Initialize environment
 ENV = BanditsEnv(SLOTS)
 
-
-# -- Initialize online and target network
-# Trainable Net
-onlineNet = DQN(1, ENV.num_actions)
-
-# Target Net
-targetNet = DQN(1, ENV.num_actions)
-
-# Load trainable net parameters into target net 
-targetNet.load_state_dict(onlineNet.state_dict())
-
-# Set target net into evaluation mode 
-targetNet.eval()
-
-# Set optimizer
-optimizer = torch.optim.Adam(onlineNet.parameters(), lr=LR)
-
-
-# -- Initialize the Replay Buffer
-buffer = ReplayMemory( capacity=BUFFER_CAPACITY )
-
+# -- NoProp MLPs
+mlps = nn.ModuleList([DenoisingMLP(ENV.num_actions) for _ in range(T)])
+optimizers = [optim.Adam(mlp.parameters(), lr=LR) for mlp in mlps]
 
 # -- Initialize Epsilon-greedy
 epsilon = 1.0
 epsilon_min = 0.05
 epsilon_decay = 0.995
 
+# Diffusion
+diffuser = Diffusion(T, alpha)
+
 
 # Execute training loop
 q_history = train(
         ENV,
-        onlineNet, 
-        targetNet,
-        buffer,
         EPISODES,
-        optimizer,
+        mlps,
+        optimizers,
+        diffuser,
         epsilon,
         epsilon_min,
         epsilon_decay,
-        batch_size = BATCH_SIZE,
-        targetNet_update = TARGET_UPDATE
     )
 
 
@@ -86,7 +64,7 @@ for i in range(q_history.shape[1]):
 
 plt.xlabel("Training checkpoints")
 plt.ylabel("Q-value")
-plt.title(f"DQN learning on bandit")
+plt.title(f"NoProp - DQN learning on bandit")
 plt.legend()
 plt.tight_layout()
 plt.show()
@@ -97,13 +75,17 @@ plt.show()
 
 def greedy_policy(state):
     with torch.no_grad():
-        q_values = onlineNet(state)
-        return q_values.argmax(dim=1).item()
+        z = torch.randn(1, ENV.num_actions, device=state.device)
+
+        for t in reversed(range(diffuser.T)):
+            z = mlps[t](state, z)
+
+        return z.argmax(dim=1).item()
 
 def random_policy(_):
     return random.randint(0, ENV.num_actions - 1)
 
-def evaluate(policy_fn, steps=10000):
+def evaluate(policy_fn, steps=5000):
     total_reward = 0.0
     state = torch.tensor([[1.0]], dtype=torch.float32)
 
