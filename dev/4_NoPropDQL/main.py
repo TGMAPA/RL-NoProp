@@ -10,9 +10,14 @@ import matplotlib.pyplot as plt
 
 
 # -- Config
+# SLOTS = [
+#     {"outcomes": [0, 10], "probabilities": [0.6, 0.4]},
+#     {"outcomes": [0, 100], "probabilities": [0.97, 0.03]},
+# ]
+
 SLOTS = [
-    {"outcomes": [0, 10], "probabilities": [0.6, 0.4]},
-    {"outcomes": [0, 100], "probabilities": [0.97, 0.03]},
+    {"outcomes": [0, 100], "probabilities": [0.2, 0.8]},
+    {"outcomes": [0, 100], "probabilities": [0.8, 0.2]},
 ]
 
 LR = 1e-3

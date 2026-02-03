@@ -16,8 +16,8 @@ BUFFER_CAPACITY = 1500
 # ]
 
 SLOTS = [
-    {"outcomes": [10, 0], "probabilities": [0.6, 0.4]},
-    {"outcomes": [0, 100], "probabilities": [0.4, 0.6]},
+    {"outcomes": [100, 0], "probabilities": [0.6, 0.4]},
+    {"outcomes": [0, 100], "probabilities": [0.4, 0.6]}
 ]
 
 TARGET_UPDATE = 100
@@ -93,7 +93,7 @@ plt.show()
 
 
 
-# Test
+# ------ Test
 
 def greedy_policy(state):
     with torch.no_grad():
@@ -103,19 +103,32 @@ def greedy_policy(state):
 def random_policy(_):
     return random.randint(0, ENV.num_actions - 1)
 
-def evaluate(policy_fn, steps=10000):
+def evaluate(env, policy_fn, steps=10000):
     total_reward = 0.0
     state = torch.tensor([[1.0]], dtype=torch.float32)
 
     for _ in range(steps):
         action = policy_fn(state)
-        reward = ENV.step(action)
+        reward = env.step(action)
         total_reward += reward
 
     return total_reward / steps
 
-avg_learned = evaluate(greedy_policy)
-avg_random = evaluate(random_policy)
+def test(steps = 10000):
 
-print(f"Average reward (learned): {avg_learned:.3f}")
-print(f"Average reward (random):  {avg_random:.3f}")
+    slots = [
+        {"outcomes": [200, 0], "probabilities": [0.8, 0.2]},
+        {"outcomes": [0, 100], "probabilities": [0.2, 0.8]},
+    ]
+
+    # Create test env
+    test_env = BanditsEnv(slots)
+
+    avg_learned = evaluate(test_env, greedy_policy, steps)
+    avg_random = evaluate(test_env, random_policy, steps)
+
+    print(f"Average reward (learned): {avg_learned:.3f}")
+    print(f"Average reward (random):  {avg_random:.3f}")
+
+
+test(steps=10000)
