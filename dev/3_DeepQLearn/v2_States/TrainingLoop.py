@@ -69,7 +69,7 @@ def train(env,
             if i% 10 == 0:
                 with torch.no_grad():
                     q = onlineNet(
-                        torch.tensor(state, dtype= torch.float32).unsqueeze(0)
+                        state.unsqueeze(0)
                     )
                     q_history.append(q.squeeze(0).cpu().numpy())
 

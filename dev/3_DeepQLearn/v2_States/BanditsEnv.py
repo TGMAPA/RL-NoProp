@@ -27,10 +27,12 @@ class BanditsEnv:
     def step(self, action):
         slot = self.slots[action]
         reward = random.choices(
-            slot["outcomes"],
-            slot["probabilities"]
-        )[0]
+                slot["outcomes"],
+                slot["probabilities"]
+            )[0]
 
         # No transition
 
         return reward
+
+

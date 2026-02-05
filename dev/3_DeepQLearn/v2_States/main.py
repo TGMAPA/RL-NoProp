@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 # -- Config
-BUFFER_CAPACITY = 10000
+BUFFER_CAPACITY = 2000
 
 SLOTS = [
     {"outcomes": [10, 0], "probabilities": [0.8, 0.2]},
@@ -21,7 +21,7 @@ BATCH_SIZE = 64
 
 LR = 1e-3
 
-EPISODES = 10000
+EPISODES = 100000
 
 
 
@@ -72,21 +72,6 @@ q_history = train(
     )
 
 
-#  Graphs
-q_history = np.array(q_history)
-
-plt.figure(figsize=(8, 5))
-for i in range(q_history.shape[1]):
-    plt.plot(q_history[:, i], label=f"Q(slot {i})")
-
-plt.xlabel("Training checkpoints")
-plt.ylabel("Q-value")
-plt.title(f"DQN learning on bandit")
-plt.legend()
-plt.tight_layout()
-plt.show()
-
-
 
 # ------ Test
 
@@ -100,9 +85,9 @@ def random_policy(_):
 
 def evaluate(env, policy_fn, steps):
     total_reward = 0.0
-    state = env.getState()
-
+    
     for _ in range(steps):
+        state = env.getState()
         action = policy_fn(state)
         reward = env.step(action)
         total_reward += reward
@@ -111,10 +96,17 @@ def evaluate(env, policy_fn, steps):
 
 def test(steps = 10000):
 
+    # -- Test Slots:
     slots = [
-        {"outcomes": [200, 0], "probabilities": [0.8, 0.2]},
+        {"outcomes": [500, 0], "probabilities": [0.8, 0.2]},
         {"outcomes": [0, 100], "probabilities": [0.2, 0.8]},
     ]
+
+    # -- Training Slots:
+    # SLOTS = [
+    #     {"outcomes": [10, 0], "probabilities": [0.8, 0.2]},
+    #     {"outcomes": [0, 100], "probabilities": [0.2, 0.8]},
+    # ]
 
     # Create test env
     test_env = BanditsEnv(slots)
@@ -127,3 +119,18 @@ def test(steps = 10000):
 
 
 test(steps=10000)
+
+
+# ------ Graphs
+q_history = np.array(q_history)
+
+plt.figure(figsize=(8, 5))
+for i in range(q_history.shape[1]):
+    plt.plot(q_history[:, i], label=f"Q(slot {i})")
+
+plt.xlabel("Training checkpoints")
+plt.ylabel("Q-value")
+plt.title(f"DQN learning on bandit")
+plt.legend()
+plt.tight_layout()
+plt.show()
