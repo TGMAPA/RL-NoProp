@@ -8,11 +8,11 @@ import matplotlib.pyplot as plt
 
 
 # -- Config
-BUFFER_CAPACITY = 2000
+BUFFER_CAPACITY = 8000
 
 SLOTS = [
-    {"outcomes": [10, 0], "probabilities": [0.8, 0.2]},
-    {"outcomes": [0, 100], "probabilities": [0.2, 0.8]},
+    {"outcomes": [100, 0], "probabilities": [0.8, 0.2]},
+    {"outcomes": [0, 100], "probabilities": [0.8, 0.2]},
 ]
 
 TARGET_UPDATE = 100
@@ -98,15 +98,9 @@ def test(steps = 10000):
 
     # -- Test Slots:
     slots = [
-        {"outcomes": [500, 0], "probabilities": [0.8, 0.2]},
+        {"outcomes": [100, 0], "probabilities": [0.2, 0.8]},
         {"outcomes": [0, 100], "probabilities": [0.2, 0.8]},
     ]
-
-    # -- Training Slots:
-    # SLOTS = [
-    #     {"outcomes": [10, 0], "probabilities": [0.8, 0.2]},
-    #     {"outcomes": [0, 100], "probabilities": [0.2, 0.8]},
-    # ]
 
     # Create test env
     test_env = BanditsEnv(slots)
