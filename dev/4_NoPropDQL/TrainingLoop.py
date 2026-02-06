@@ -28,7 +28,7 @@ def train(env,
                 # Get noisy vector 
                 z = torch.randn(1, env.num_actions)
 
-                # Inverse Disffusion (Inference)
+                # Inverse Diffusion (Inference)
                 for t in reversed(range(diffuser.T)):
                     z = mlps[t](torch.tensor(env.state).unsqueeze(0), z)
 
